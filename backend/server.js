@@ -28,9 +28,19 @@ async function connectDB(){
 
 connectDB();
 
+
 app.get("/recipes", async (req,res)=>{
+    const search = req.query.search || "";
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    skip = (page - 1)* limit;
     try{
-        const recipes = await recipesCollection.find().toArray();
+        const recipes = await recipesCollection
+            .find({title: {$regex: search, $options:"i"}})
+            .skip(skip)
+            .limit(limit)
+            .toArray();
         res.json(recipes);
     }
     catch(err){
@@ -38,5 +48,6 @@ app.get("/recipes", async (req,res)=>{
     }
 });
 
+app.get('/recipes/search')
 
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
