@@ -29,7 +29,17 @@ async function connectDB(){
 connectDB();
 
 
+
 app.get("/recipes", async (req,res)=>{
+    /**
+ * @api {get} /recipes Get Recipes
+ * @apiDescription Retrieves a list of recipes, supporting keyword search by title and pagination.
+ * @apiQuery {String} [search] Filters recipes by title (case-insensitive regex).
+ * @apiQuery {Number} [page=1] The current page number.
+ * @apiQuery {Number} [limit=10] The number of recipes per page.
+ * @apiSuccess {Object[]} recipes Array of recipe objects.
+ **/
+
     const search = req.query.search || "";
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -48,7 +58,15 @@ app.get("/recipes", async (req,res)=>{
     }
 });
 
+
 app.post('/recipes/ingredients', async (req,res)=>{
+    /**
+ * @api {post} /recipes/ingredients Find Recipes by Ingredients
+ * @apiDescription Finds and sorts recipes based on the ingredients provided in the request body.
+ * It prioritizes recipes with the most matching ingredients.
+ * @apiBody {String[]} ingredients An array of ingredients the user has available.
+ * @apiSuccess {Object[]} recipes Array of recipe objects, sorted by 'matchedIngredients' (descending).
+ **/
     try{
         const userIngredients = req.body.ingredients;
 
