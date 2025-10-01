@@ -61,5 +61,131 @@
     "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/66fd5b9399e8e2a18bd7302a-57419fd1.jpeg",
     "source_url": "https://www.hellofresh.com/recipes/market/margherita-pizza-pockets-66fd5b9399e8e2a18bd7302a",
     "ingredients": ["pizza dough", "mozzarella cheese", "tomato sauce", "basil", "olive oil"]
+  },
+  {
+    "title": "Garlic Herb Butter–Basted Scallops",
+    "description": "Tender scallops basted with garlic herb butter, served golden and flavorful.",
+    "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/665dec8907c68e1e8bb69ad5-61735c8a.jpeg",
+    "source_url": "https://www.hellofresh.com/recipes/garlic-herb-butter-basted-scallops-68ac41d082758da705ef5795",
+    "ingredients": ["scallops", "garlic", "butter", "parsley", "lemon", "olive oil"]
+  },
+  {
+    "title": "Prep & Bake Cheesy Tomato Ravioli",
+    "description": "Baked ravioli with cheesy filling and a rich tomato sauce.",
+    "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/681989ce34c41957efda3f78-0efc1780.jpeg",
+    "source_url": "https://www.hellofresh.com/recipes/prep-and-bake-cheesy-tomato-ravioli-68ac4765903f39c73a195635",
+    "ingredients": ["ravioli", "tomato sauce", "mozzarella cheese", "parmesan", "basil", "olive oil"]
+  },
+  {
+    "title": "Bacon & Mushroom Risotto",
+    "description": "Creamy risotto cooked with smoky bacon and earthy mushrooms.",
+    "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/66df5367e8117baf19724e1e-2923e138.jpeg",
+    "source_url": "https://www.hellofresh.com/recipes/bacon-mushroom-risotto-68ac562834401f72217718b3",
+    "ingredients": ["arborio rice", "bacon", "mushrooms", "onion", "parmesan", "chicken broth"]
+  },
+  {
+    "title": "White Cheddar Crunch Burgers",
+    "description": "Juicy burgers topped with melted white cheddar and a crunchy garnish.",
+    "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/661d64263d20ae432f30b50f-067e3e68.jpeg",
+    "source_url": "https://www.hellofresh.com/recipes/white-cheddar-crunch-burgers-68ac76d4903f39c73a19572b",
+    "ingredients": ["ground beef", "white cheddar", "burger buns", "lettuce", "tomato", "crispy onions"]
+  },
+  {
+    "title": "Sweet Chili Turkey Lettuce Wraps",
+    "description": "Ground turkey in sweet chili sauce served in crisp lettuce cups.",
+    "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/6682eb6788a40e5df74250ce-ecf9a234.jpeg",
+    "source_url": "https://www.hellofresh.com/recipes/sweet-chili-turkey-lettuce-wraps-68ac81cd903f39c73a19572f",
+    "ingredients": ["ground turkey", "lettuce", "sweet chili sauce", "carrots", "soy sauce", "scallions"]
+  },
+  {
+    "title": "Spice Market Lentil Burgers",
+    "description": "Hearty lentil patties with bold spices, served as a veggie burger.",
+    "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/68ad864134401f7221771a56-2c136edf.jpeg",
+    "source_url": "https://www.hellofresh.com/recipes/spice-market-lentil-burgers-68ad864134401f7221771a56",
+    "ingredients": ["lentils", "onion", "garlic", "cumin", "coriander", "burger buns"]
+  },
+  {
+    "title": "Mozzarella-Crusted Chicken",
+    "description": "Crispy chicken breasts coated in a mozzarella crust and baked to golden perfection.",
+    "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/de-mozzarella-crusted-chicken-w0-4336bddd.jpg",
+    "source_url": "https://www.hellofresh.com/recipes/mozzarella-crusted-chicken-5845b27b2e69d7646110f1c2",
+    "ingredients": ["chicken breast", "mozzarella cheese", "breadcrumbs", "garlic", "parsley", "olive oil"]
+  },
+  {
+    "title": "Rapid Crispy Shrimp Tacos",
+    "description": "Quick tacos filled with crispy shrimp, fresh toppings, and zesty sauce.",
+    "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/rapid-shrimp-tacos-22d5dd1e.jpg",
+    "source_url": "https://www.hellofresh.com/recipes/rapid-shrimp-tacos-5835af6d9df181790731abd2",
+    "ingredients": ["shrimp", "tortilla", "cabbage", "lime", "sour cream", "chili powder"]
+  },
+  {
+    "title": "Teriyaki Chicken Tenders",
+    "description": "Juicy chicken tenders glazed with sweet and savory teriyaki sauce.",
+    "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/5a664231ad1d6c6f007d0d72-0c9bca71.jpg",
+    "source_url": "https://www.hellofresh.com/recipes/teriyaki-chicken-tenders-5a664231ad1d6c6f007d0d72",
+    "ingredients": ["chicken tenders", "soy sauce", "ginger", "garlic", "brown sugar", "sesame seeds"]
+  },
+  {
+    "title": "Spanish One-Pan Chicken",
+    "description": "A rustic Spanish-style chicken dish cooked with veggies and spices in one pan.",
+    "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/spanish-one-pot-chicken-7dc5fcf4.jpg",
+    "source_url": "https://www.hellofresh.com/recipes/spanish-one-pan-chicken-582c97682e69d7666b64ed42",
+    "ingredients": ["chicken thighs", "bell pepper", "tomato", "paprika", "onion", "olive oil"]
+  },
+  {
+    "title": "Crispy Parmesan Chicken",
+    "description": "Chicken breasts coated in a crunchy parmesan crust and oven-baked.",
+    "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/5e25f50779260e7a2945d952-a6d38e25.jpg",
+    "source_url": "https://www.hellofresh.com/recipes/crispy-parmesan-chicken-5e25f50779260e7a2945d952",
+    "ingredients": ["chicken breast", "parmesan cheese", "breadcrumbs", "egg", "garlic powder", "parsley"]
+  },
+  {
+    "title": "Korean Beef Bibimbap",
+    "description": "A Korean rice bowl topped with savory beef, sautéed veggies, and a fried egg.",
+    "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/5ab3b883ae08b53bb4024952-cd6ea4a4.jpg",
+    "source_url": "https://www.hellofresh.com/recipes/korean-beef-bibimbap-5ab3b883ae08b53bb4024952",
+    "ingredients": ["ground beef", "rice", "carrots", "zucchini", "soy sauce", "egg", "gochujang"]
+  },
+  {
+    "title": "Chicken, Cauliflower & Chickpea Curry",
+    "description": "A hearty curry with chicken, cauliflower, and protein-packed chickpeas simmered in spices.",
+    "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/66ba4ca7fb4859096c8b62ad-1d4ab1b2.jpeg",
+    "source_url": "https://www.hellofresh.com/recipes/chicken-cauliflower-and-chickpea-curry-66bcf673e0cd363400c275c7",
+    "ingredients": ["chicken breast", "cauliflower", "chickpeas", "curry powder", "tomato", "onion", "garlic"]
+  },
+  {
+    "title": "Spiced Cauliflower with Chickpea Curry",
+    "description": "A vegetarian curry with spiced cauliflower and tender chickpeas in a rich sauce.",
+    "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/66ba4ca7fb4859096c8b62ad-1d4ab1b2.jpeg",
+    "source_url": "https://www.hellofresh.com/recipes/spiced-cauliflower-with-chickpea-curry-66ba4ca7fb4859096c8b62ad",
+    "ingredients": ["cauliflower", "chickpeas", "curry powder", "garlic", "tomato", "onion", "cilantro"]
+  },
+  {
+    "title": "Chickpea Fritters & Chicken",
+    "description": "Golden chickpea fritters served alongside juicy chicken for a protein-rich meal.",
+    "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/66b151d778d91450badf8186-16457689.jpeg",
+    "source_url": "https://www.hellofresh.com/recipes/chickpea-fritters-and-chicken-66b3e072995e511e4eca9ed8",
+    "ingredients": ["chickpeas", "flour", "chicken breast", "garlic", "cumin", "parsley", "onion"]
+  },
+  {
+    "title": "Coconut Curry Turkey with Chickpeas",
+    "description": "Savory turkey simmered in coconut curry with hearty chickpeas for a flavorful dish.",
+    "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/63fe35d8db3e0401490898c0-5a9ba1b5.jpg",
+    "source_url": "https://www.hellofresh.com/recipes/coconut-curry-turkey-with-chickpeas-659ef92ff9e1c820e370b28c",
+    "ingredients": ["ground turkey", "coconut milk", "chickpeas", "ginger", "garlic", "onion", "curry powder"]
+  },
+  {
+    "title": "Spicy Chicken Coconut Curry Soup",
+    "description": "A warming soup with chicken, coconut milk, and spicy curry flavors.",
+    "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/64d255c17a42584bbbe507ff-1fdcd8ba.jpeg",
+    "source_url": "https://www.hellofresh.com/recipes/spicy-chicken-coconut-curry-soup-64d3d325b7c13e5fd9fd1fc4",
+    "ingredients": ["chicken breast", "coconut milk", "curry paste", "chili", "garlic", "onion", "lime"]
+  },
+  {
+    "title": "Warm Curried Tofu & Rice Wraps",
+    "description": "Tofu and rice wrapped with warm curry spices in soft tortillas.",
+    "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/6488853c0b7af205da01b344-3ad009cb.jpeg",
+    "source_url": "https://www.hellofresh.com/recipes/warm-curried-tofu-and-rice-wraps-6488853c0b7af205da01b344",
+    "ingredients": ["tofu", "rice", "tortilla", "curry powder", "garlic", "spinach", "onion"]
   }
 ]
