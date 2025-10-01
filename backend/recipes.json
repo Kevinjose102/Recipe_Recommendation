@@ -3,55 +3,63 @@
     "title": "Sweet Thai Chili Burgers",
     "description": "Juicy burgers with a sweet Thai chili glaze and fresh toppings.",
     "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/660c57ed9149ba03ec9b05a0-487ce2f6.jpeg",
-    "source_url": "https://www.hellofresh.com/recipes/sweet-thai-chili-burgers-68ac368982758da705ef5519"
+    "source_url": "https://www.hellofresh.com/recipes/sweet-thai-chili-burgers-68ac368982758da705ef5519",
+    "ingredients": ["ground beef", "breadcrumbs", "egg", "lettuce", "tomato", "thai chili sauce", "burger bun"]
   },
   {
     "title": "Peppercorn Steak",
     "description": "Classic steak topped with a creamy peppercorn sauce.",
     "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/peppercorn-steak-w06-e4014085.jpg",
-    "source_url": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/peppercorn-steak-w06-e4014085.jpg"
+    "source_url": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/peppercorn-steak-w06-e4014085.jpg",
+    "ingredients": ["sirloin steak", "black peppercorns", "cream", "garlic", "butter", "olive oil"]
   },
   {
     "title": "Chicken & Pepper Enchiladas",
     "description": "Cheesy enchiladas filled with tender chicken and peppers.",
     "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/6704604899e8e2a18bd76237-137279dd.jpeg",
-    "source_url": "https://www.hellofresh.com/recipes/chicken-and-pepper-enchiladas-6706cc2c10eac7b3edfebdac"
+    "source_url": "https://www.hellofresh.com/recipes/chicken-and-pepper-enchiladas-6706cc2c10eac7b3edfebdac",
+    "ingredients": ["chicken breast", "bell pepper", "cheese", "tortilla", "sour cream", "enchilada sauce"]
   },
   {
     "title": "Crispy Cheddar Chicken",
     "description": "Crispy baked chicken coated in a cheesy cheddar crust.",
     "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/611d22ff1fc432111c386609-7da1d170.jpg",
-    "source_url": "https://www.hellofresh.com/recipes/crispy-cheddar-chicken-611d22ff1fc432111c386609"
+    "source_url": "https://www.hellofresh.com/recipes/crispy-cheddar-chicken-611d22ff1fc432111c386609",
+    "ingredients": ["chicken breast", "cheddar cheese", "breadcrumbs", "egg", "olive oil", "garlic powder"]
   },
   {
     "title": "Sirloin Steak & Roasted Garlic Pan Sauce",
     "description": "Seared sirloin steak served with a rich roasted garlic pan sauce.",
     "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/60f82a0367b2ce1a3350f0ac-e2968f9f.jpg",
-    "source_url": "https://www.hellofresh.com/recipes/sirloin-steak-and-roasted-garlic-pan-sauce-60f82a0367b2ce1a3350f0ac"
+    "source_url": "https://www.hellofresh.com/recipes/sirloin-steak-and-roasted-garlic-pan-sauce-60f82a0367b2ce1a3350f0ac",
+    "ingredients": ["sirloin steak", "garlic", "butter", "olive oil", "beef stock", "thyme"]
   },
   {
     "title": "Hoisin Pork Burgers",
     "description": "Savory pork burgers glazed with hoisin sauce and served with fresh toppings.",
     "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/hoisin-pork-burgers-c8b816cf.jpg",
-    "source_url": "https://www.hellofresh.com/recipes/hoisin-pork-burgers-5d920ed4eae98854a63213d2"
+    "source_url": "https://www.hellofresh.com/recipes/hoisin-pork-burgers-5d920ed4eae98854a63213d2",
+    "ingredients": ["ground pork", "hoisin sauce", "egg", "lettuce", "cucumber", "burger bun"]
   },
   {
     "title": "Mediterranean Couscous Bowls",
     "description": "A hearty couscous bowl with Mediterranean flavors, hummus, and fresh veggies.",
     "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/mediterranean-hummus-couscous-bowls-9aa1b9c2.jpg",
-    "source_url": "https://www.hellofresh.com/recipes/mediterranean-hummus-couscous-bowls-5dcb270d75717c39e2461100"
+    "source_url": "https://www.hellofresh.com/recipes/mediterranean-hummus-couscous-bowls-5dcb270d75717c39e2461100",
+    "ingredients": ["couscous", "hummus", "cucumber", "tomato", "olive", "feta cheese", "lemon juice"]
   },
   {
     "title": "Spaghetti Aglio e Olio",
     "description": "A quick Italian pasta with garlic, chili flakes, and olive oil.",
     "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/65aff4c1a33a91ae6a3f7e8b-3eff196b.jpeg",
-    "source_url": "https://www.hellofresh.com/recipes/chicken-and-mushroom-spaghetti-aglio-e-olio-65b16feba33a91ae6a3f8f97"
+    "source_url": "https://www.hellofresh.com/recipes/chicken-and-mushroom-spaghetti-aglio-e-olio-65b16feba33a91ae6a3f8f97",
+    "ingredients": ["spaghetti", "garlic", "olive oil", "chili flakes", "parsley", "parmesan cheese"]
   },
   {
     "title": "Margherita Pizza Pockets",
     "description": "Cheesy pockets filled with classic Margherita pizza flavor.",
     "thumbnail": "https://media.hellofresh.com/c_fit,f_auto,fl_lossy,h_1100,q_50,w_2600/hellofresh_s3/image/66fd5b9399e8e2a18bd7302a-57419fd1.jpeg",
-    "source_url": "https://www.hellofresh.com/recipes/market/margherita-pizza-pockets-66fd5b9399e8e2a18bd7302a"
+    "source_url": "https://www.hellofresh.com/recipes/market/margherita-pizza-pockets-66fd5b9399e8e2a18bd7302a",
+    "ingredients": ["pizza dough", "mozzarella cheese", "tomato sauce", "basil", "olive oil"]
   }
 ]
-
