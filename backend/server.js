@@ -48,6 +48,36 @@ app.get("/recipes", async (req,res)=>{
     }
 });
 
-app.get('/recipes/search')
+app.post('/recipes/ingredients', async (req,res)=>{
+    try{
+        const userIngredients = req.body.ingredients;
+
+        if(! Array.isArray(userIngredients)){
+            return res.status(400).json({error : "Ingredients must be an array"});
+        }
+
+        const recipes = await recipesCollection.aggregate([
+            {
+                $addFields: {
+                matchedIngredients: {
+                    $size: {
+                        $setIntersection: ["$ingredients", userIngredients]
+                    }
+                }
+                }
+            },
+        { $match: { matchedIngredients: { $gt: 0 } } },
+        { $sort: { matchedIngredients: -1 } } // recipes with more matches first
+        ]).toArray();
+
+        res.json(recipes);
+    
+    }
+    catch( err ){
+        console.error("Error occured: ",err);
+        res.status(500).json({error : "Server error"});
+    }
+});
+
 
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
