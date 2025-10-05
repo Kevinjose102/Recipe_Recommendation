@@ -133,7 +133,7 @@ function App() {
     <div className="container">
       {/* Sidebar */}
       <div className="sidebar">
-        <h2>Pantry</h2>
+        <h2 >Pantry</h2>
         <div className="ingredients">
           {allIngredients.map((ingredient) => (
             <button
