@@ -42,7 +42,7 @@ Make sure you have the following installed:
 Clone the repository:
 
 ```bash
-git clone <your-repo-url>
+git clone <https://github.com/Joel-Sony/Recipe_Recommendation>
 cd Recipe_Recommendation
 ```
 
@@ -67,6 +67,7 @@ Start the backend server:
 npm start
 ```
 
+---
 ## Frontend Setup
 
 ```bash
@@ -93,6 +94,7 @@ Recipe_Recommendation/
 └─ README.md
 ```
 
+---
 ## Usage
 
 Open the frontend in your browser.
@@ -105,8 +107,19 @@ Optionally, search for recipes by name.
 
 Click View Recipe to open the source.
 
+---
+
 ## License
 
 This project is open-source. Feel free to use and modify it.
 
 ---
+## Contributors
+
+David George  
+Densel Sabu  
+Joel Sony  
+Jovel Joseph   
+Juan Moncy   
+Kevin Jose  
+
