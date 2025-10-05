@@ -118,8 +118,8 @@ This project is open-source. Feel free to use and modify it.
 
 David George  
 Joel Sony  
-Joseph Thankachan
+Joseph Thankachan  
 Jovel Joseph   
 Juan Moncy   
 Kevin Jose  
-<span style="color:#0d1117;">Densel Sabu</span>
+
