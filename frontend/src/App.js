@@ -64,7 +64,6 @@ const allIngredients = [
   "paprika",
   "zucchini",
   "rice",
-  "egg (for bibimbap)",
   "gochujang",
   "cauliflower",
   "chickpeas",
@@ -79,20 +78,11 @@ const allIngredients = [
   "spinach"
 ];
 
+
 function App() {
   const [selectedIngredients, setSelectedIngredients] = useState([]);
-  const [allRecipes, setAllRecipes] = useState([]);  // from backend
-  const [filteredRecipes, setFilteredRecipes] = useState([]);
-
-  // Fetch recipes from backend on load
-  useEffect(() => {
-    fetch("http://localhost:5000/recipes")
-      .then((res) => res.json())
-      .then((data) => {
-        setAllRecipes(data);
-      })
-      .catch((err) => console.error("Error fetching recipes:", err));
-  }, []);
+  const [recipes, setRecipes] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const toggleIngredient = (ingredient) => {
     setSelectedIngredients((prev) =>
@@ -102,20 +92,48 @@ function App() {
     );
   };
 
-  const generateRecipes = () => {
-    const matches = allRecipes.filter((recipe) =>
-      selectedIngredients.some((ing) =>
-        recipe.ingredients.map(i => i.toLowerCase()).includes(ing.toLowerCase())
-      )
-    );
-    setFilteredRecipes(matches);
+  const fetchRecipes = async () => {
+    try {
+      let url = "http://localhost:5000/recipes";
+
+      if (selectedIngredients.length > 0) {
+        const res = await fetch("http://localhost:5000/recipes/ingredients", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ingredients: selectedIngredients }),
+        });
+        const data = await res.json();
+
+        const filtered = searchTerm
+          ? data.filter((recipe) =>
+              recipe.title.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+          : data;
+
+        setRecipes(filtered);
+      } else {
+        if (searchTerm) {
+          url += `?search=${encodeURIComponent(searchTerm)}`;
+        }
+        const res = await fetch(url);
+        const data = await res.json();
+        setRecipes(data);
+      }
+    } catch (err) {
+      console.error("Error fetching recipes:", err);
+    }
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    fetchRecipes();
   };
 
   return (
     <div className="container">
-      {/* Left Panel */}
+      {/* Sidebar */}
       <div className="sidebar">
-        <h2>🛒 Pantry</h2>
+        <h2>Pantry</h2>
         <div className="ingredients">
           {allIngredients.map((ingredient) => (
             <button
@@ -129,33 +147,58 @@ function App() {
             </button>
           ))}
         </div>
-        <button className="generate-btn" onClick={generateRecipes}>
-          🍳 Generate Recipes
+        <button className="generate-btn" onClick={fetchRecipes}>
+          Generate Recipes
         </button>
       </div>
 
-      {/* Right Panel */}
+      {/* Main Content */}
       <div className="content">
-        <h2>📖 Recipes</h2>
-        {filteredRecipes.length > 0 ? (
+        <div className="content-header">
+          <img
+            src={`${process.env.PUBLIC_URL}/recipe.png`}
+            alt="Recipe Recommender Logo"
+            className="logo"
+          />
+          <h2>Recipe Recommender</h2>
+        </div>
+
+        {/* Search Bar */}
+        <form onSubmit={handleSearch} className="search-form">
+          <input
+            type="text"
+            placeholder="Search recipes by name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <button type="submit" className="search-btn">Search</button>
+        </form>
+
+        {recipes.length > 0 ? (
           <div className="recipe-list">
-            {filteredRecipes.map((recipe) => (
+            {recipes.map((recipe) => (
               <div key={recipe._id} className="recipe-card">
-                <div className="recipe-image">
-                  <img src={recipe.thumbnail} alt={recipe.title} className="image" />
-                </div>
+                <img src={recipe.thumbnail} alt={recipe.title} className="recipe-image" />
                 <div className="recipe-info">
                   <h3>{recipe.title}</h3>
                   <p>{recipe.description}</p>
-                  <a href={recipe.source_url} target="_blank" rel="noopener noreferrer">
+                  <a
+                    href={recipe.source_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="view-btn"
+                  >
                     View Recipe
                   </a>
+                  {recipe.matchedIngredients !== undefined && (
+                    <p className="matched">Matched Ingredients: {recipe.matchedIngredients}</p>
+                  )}
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <p className="empty">No recipes yet. Select ingredients & click generate.</p>
+          <p className="empty">No recipes found. Select ingredients or search by name.</p>
         )}
       </div>
     </div>
