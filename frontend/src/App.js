@@ -32,8 +32,10 @@ function App() {
     title: "",
     description: "",
     thumbnail: "",
-    source_url: ""
+    source_url: "",
+    ingredients: []
   });
+  const [ingredientsText, setIngredientsText] = useState("");
 
   // Load recipes on initial mount
   useEffect(() => {
@@ -181,13 +183,18 @@ function App() {
 
   const handleAddRecipe = async (e) => {
     e.preventDefault();
-    
+    const ingredientsArray = ingredientsText
+      .split(",")
+      .map(i => i.trim())
+      .filter(i => i.length > 0);
+
+    const recipeToSend = { ...newRecipe, ingredients: ingredientsArray };
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE_URL}/recipes`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newRecipe)
+        body: JSON.stringify(recipeToSend)
       });
       
       if (!res.ok) {
@@ -197,7 +204,7 @@ function App() {
       
       alert("Recipe added successfully!");
       setShowAddModal(false);
-      setNewRecipe({ title: "", description: "", thumbnail: "", source_url: "" });
+      setNewRecipe({ title: "", description: "", thumbnail: "", source_url: "", ingredients: [] });
       
       if (!showTrash) {
         await fetchRecipes();
@@ -212,7 +219,12 @@ function App() {
 
   const handleUpdateRecipe = async (e) => {
     e.preventDefault();
-    
+
+    const ingredientsArray = ingredientsText
+      .split(",")
+      .map(i => i.trim())
+      .filter(i => i.length > 0);
+
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE_URL}/recipes/${editingRecipe._id}`, {
@@ -222,7 +234,8 @@ function App() {
           title: editingRecipe.title,
           description: editingRecipe.description,
           thumbnail: editingRecipe.thumbnail,
-          source_url: editingRecipe.source_url
+          source_url: editingRecipe.source_url,
+          ingredients: ingredientsArray
         })
       });
       
@@ -250,8 +263,10 @@ function App() {
 
   const openEditModal = (recipe) => {
     setEditingRecipe({ ...recipe });
+    setIngredientsText(recipe.ingredients ? recipe.ingredients.join(", ") : "");
     setShowEditModal(true);
-  };
+};
+
 
   const toggleTrashView = () => {
     setShowTrash(!showTrash);
@@ -266,7 +281,7 @@ function App() {
 
   const closeAddModal = () => {
     setShowAddModal(false);
-    setNewRecipe({ title: "", description: "", thumbnail: "", source_url: "" });
+    setNewRecipe({ title: "", description: "", thumbnail: "", source_url: "", ingredients: [] });
   };
 
   const closeEditModal = () => {
@@ -470,6 +485,18 @@ function App() {
                 required
                 disabled={loading}
               />
+              <div className="ingredients-input-section">
+                <label>Ingredients (comma-separated)</label>
+                <textarea
+                  placeholder="e.g., tomato, cheese, basil, olive oil"
+                  value={ingredientsText}
+                  onChange={(e) => setIngredientsText(e.target.value)}
+                  rows="3"
+                />
+                <small className="helper-text">
+                  Enter ingredients separated by commas
+                </small>
+              </div>
               <div className="modal-actions">
                 <button type="submit" className="submit-btn" disabled={loading}>
                   {loading ? "Adding..." : "Add Recipe"}
@@ -520,6 +547,18 @@ function App() {
                 required
                 disabled={loading}
               />
+              <div className="ingredients-input-section">
+                <label>Ingredients (comma-separated)</label>
+                <textarea
+                  placeholder="e.g., tomato, cheese, basil, olive oil"
+                  value={ingredientsText}
+                  onChange={(e) => setIngredientsText(e.target.value)}
+                  rows="3"
+                />
+                <small className="helper-text">
+                  Enter ingredients separated by commas
+                </small>
+              </div>
               <div className="modal-actions">
                 <button type="submit" className="submit-btn" disabled={loading}>
                   {loading ? "Updating..." : "Update Recipe"}

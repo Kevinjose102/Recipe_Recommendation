@@ -112,7 +112,7 @@ app.post('/recipes', async (req,res) =>{
 
         newRecipe.deleted = false;
         const result = await recipesCollection.insertOne(newRecipe);
-        res.status(201).json({message : "Recipe added successfully!", id : result.isertedId});
+        res.status(201).json({message : "Recipe added successfully!", id : result.insertedId});
     }
     catch(err){
         res.status(500).json({error : err.message});
