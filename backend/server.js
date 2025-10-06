@@ -96,5 +96,8 @@ app.post('/recipes/ingredients', async (req,res)=>{
     }
 });
 
+app.post('/recipes/update', async (req,res) =>{
+    
+})
 
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
