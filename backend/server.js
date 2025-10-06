@@ -1,6 +1,6 @@
 
 const express = require("express");
-const { MongoClient } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 const cors = require("cors");
 
 const app = express();
@@ -47,7 +47,10 @@ app.get("/recipes", async (req,res)=>{
     skip = (page - 1)* limit;
     try{
         const recipes = await recipesCollection
-            .find({title: {$regex: search, $options:"i"}})
+            .find({
+                title: {$regex: search, $options:"i"},
+                deleted:{ $ne:true}
+            })
             .skip(skip)
             .limit(limit)
             .toArray();
@@ -75,6 +78,9 @@ app.post('/recipes/ingredients', async (req,res)=>{
 
         const recipes = await recipesCollection.aggregate([
             {
+                $match: {deleted : {$ne : true}}
+            },
+            {
                 $addFields: {
                 matchedIngredients: {
                     $size: {
@@ -96,8 +102,81 @@ app.post('/recipes/ingredients', async (req,res)=>{
     }
 });
 
-app.post('/recipes/update', async (req,res) =>{
-    
+app.post('/recipes/add', async (req,res) =>{
+    try{
+        const newRecipe = req.body;
+
+        if(!newRecipe.title || !Array.isArray(newRecipe.ingredients)){
+            return res.status(400).json({error : "Missing fields: titles or ingredients!"});
+        }
+
+        newRecipe.deleted = false;
+        const result = await recipesCollection.insertOne(newRecipe);
+        res.status(201).json({message : "Recipe added successfully!", id : result.isertedId});
+    }
+    catch(err){
+        res.status(500).json({error : err.message});
+    }
+})
+
+app.put("/recipes/update/:id", async(req, res)=>{
+    try{
+        const id = req.params.id;
+        const updatedFields = req.body;
+
+        await recipesCollection.updateOne(
+            {_id: new ObjectId(id)},
+            {$set: updatedFields}
+        )
+
+        res.json({message : "Updated successfully!"});
+    }
+    catch(err){
+        res.status(500).json({error : err.message});
+    }
+})
+
+app.delete("/recipes/delete/:id", async(req, res)=>{
+    try{
+        const id = req.params.id;
+
+        await recipesCollection.updateOne(
+            {_id: new ObjectId(id)},
+            {$set: {deleted : true}}
+        );
+
+        res.json({message : "Deleted successfully!"});
+    }
+    catch(err){
+        res.status(500).json({error : err.message});
+    }
+})
+
+app.put("/recipes/restore/:id", async(req, res) =>{
+    try{
+        const id = req.params.id
+
+        await recipes.updateOne(
+            {_id : new ObjectId(id)},
+            {$set : {deleted : false}}
+        )
+
+        res.json({ message : "Recipe Restored succesfully!"});
+    }
+    catch(err){
+        res.status(500).json({error : err.message});
+    }
+})
+
+
+app.get("/recipes/trash", async (req, res) => {
+     try{
+        const trashed = await recipesCollection.find({deleted : true}).toArray();
+        res.json(trashed);
+    }
+    catch(err){
+        res.status(500).json({error : err.message});
+    }
 })
 
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
