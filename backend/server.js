@@ -102,7 +102,7 @@ app.post('/recipes/ingredients', async (req,res)=>{
     }
 });
 
-app.post('/recipes/add', async (req,res) =>{
+app.post('/recipes', async (req,res) =>{
     try{
         const newRecipe = req.body;
 
@@ -119,7 +119,7 @@ app.post('/recipes/add', async (req,res) =>{
     }
 })
 
-app.put("/recipes/update/:id", async(req, res)=>{
+app.put("/recipes/:id", async(req, res)=>{
     try{
         const id = req.params.id;
         const updatedFields = req.body;
@@ -136,7 +136,7 @@ app.put("/recipes/update/:id", async(req, res)=>{
     }
 })
 
-app.delete("/recipes/delete/:id", async(req, res)=>{
+app.delete("/recipes/:id", async(req, res)=>{
     try{
         const id = req.params.id;
 
@@ -152,11 +152,11 @@ app.delete("/recipes/delete/:id", async(req, res)=>{
     }
 })
 
-app.put("/recipes/restore/:id", async(req, res) =>{
+app.patch("/recipes/:id/restore", async(req, res) =>{
     try{
         const id = req.params.id
 
-        await recipes.updateOne(
+        await recipesCollection.updateOne(
             {_id : new ObjectId(id)},
             {$set : {deleted : false}}
         )
@@ -169,7 +169,7 @@ app.put("/recipes/restore/:id", async(req, res) =>{
 })
 
 
-app.get("/recipes/trash", async (req, res) => {
+app.get("/recipes/trashed", async (req, res) => {
      try{
         const trashed = await recipesCollection.find({deleted : true}).toArray();
         res.json(trashed);
@@ -179,7 +179,7 @@ app.get("/recipes/trash", async (req, res) => {
     }
 })
 
-app.delete("/recipes/permanent/:id", async (req, res) => {
+app.delete("/recipes/:id/permanent", async (req, res) => {
   try {
     const id = req.params.id;
     await recipesCollection.deleteOne({ _id: new ObjectId(id) });
