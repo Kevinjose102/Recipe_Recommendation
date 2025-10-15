@@ -1,4 +1,3 @@
-
 const express = require("express");
 const { MongoClient, ObjectId } = require("mongodb");
 const cors = require("cors");
@@ -12,173 +11,125 @@ app.use(express.json());
 const uri = "mongodb://localhost:27017"; // local MongoDB URI
 const client = new MongoClient(uri);
 
-let recipesCollection;
+let recipesCollection,
+  usersCollection,
+  categoriesCollection,
+  ratingsCollection,
+  favoritesCollection;
 
-async function connectDB(){
-    try{
-        await client.connect();
-        const db = client.db("recipesDB");
-        recipesCollection = db.collection("recipes");
-        console.log("Connected to MongoDB");
-    }
-    catch(err){
-        console.error("DB connection error: ",err);
-    }
+async function connectDB() {
+  try {
+    await client.connect();
+    const db = client.db("recipesDB");
+
+    recipesCollection = db.collection("recipes");
+    usersCollection = db.collection("users");
+    categoriesCollection = db.collection("categories");
+    ratingsCollection = db.collection("ratings");
+    favoritesCollection = db.collection("favorites");
+
+    console.log("✅ Connected to MongoDB with multiple collections");
+  } catch (err) {
+    console.error("DB connection error:", err);
+  }
 }
 
 connectDB();
+/* --------------------- RECIPE ROUTES --------------------- */
 
-
-
-app.get("/recipes", async (req,res)=>{
-    /**
- * @api {get} /recipes Get Recipes
- * @apiDescription Retrieves a list of recipes, supporting keyword search by title and pagination.
- * @apiQuery {String} [search] Filters recipes by title (case-insensitive regex).
- * @apiQuery {Number} [page=1] The current page number.
- * @apiQuery {Number} [limit=10] The number of recipes per page.
- * @apiSuccess {Object[]} recipes Array of recipe objects.
- **/
-
-    const search = req.query.search || "";
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
-
-    skip = (page - 1)* limit;
-    try{
-        const recipes = await recipesCollection
-            .find({
-                title: {$regex: search, $options:"i"},
-                deleted:{ $ne:true}
-            })
-            .skip(skip)
-            .limit(limit)
-            .toArray();
-        res.json(recipes);
-    }
-    catch(err){
-        res.status(500).json({error: err.message});
-    }
+// Fetch recipes (with optional search)
+app.get("/recipes", async (req, res) => {
+  const search = req.query.search || "";
+  try {
+    const recipes = await recipesCollection
+      .find({
+        title: { $regex: search, $options: "i" },
+        deleted: { $ne: true },
+      })
+      .toArray();
+    res.json(recipes);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-app.post('/recipes/ingredients', async (req,res)=>{
-    /**
- * @api {post} /recipes/ingredients Find Recipes by Ingredients
- * @apiDescription Finds and sorts recipes based on the ingredients provided in the request body.
- * It prioritizes recipes with the most matching ingredients.
- * @apiBody {String[]} ingredients An array of ingredients the user has available.
- * @apiSuccess {Object[]} recipes Array of recipe objects, sorted by 'matchedIngredients' (descending).
- **/
-    try{
-        const userIngredients = req.body.ingredients;
+// Search recipes by ingredients
+app.post("/recipes/ingredients", async (req, res) => {
+  try {
+    const userIngredients = req.body.ingredients;
+    if (!Array.isArray(userIngredients))
+      return res.status(400).json({ error: "Ingredients must be an array" });
 
-        if(! Array.isArray(userIngredients)){
-            return res.status(400).json({error : "Ingredients must be an array"});
-        }
-
-        const recipes = await recipesCollection.aggregate([
-            {
-                $match: {deleted : {$ne : true}}
+    const recipes = await recipesCollection
+      .aggregate([
+        { $match: { deleted: { $ne: true } } },
+        {
+          $addFields: {
+            matchedIngredients: {
+              $size: { $setIntersection: ["$ingredients", userIngredients] },
             },
-            {
-                $addFields: {
-                matchedIngredients: {
-                    $size: {
-                        $setIntersection: ["$ingredients", userIngredients]
-                    }
-                }
-                }
-            },
+          },
+        },
         { $match: { matchedIngredients: { $gt: 0 } } },
-        { $sort: { matchedIngredients: -1 } } // recipes with more matches first
-        ]).toArray();
+        { $sort: { matchedIngredients: -1 } },
+      ])
+      .toArray();
 
-        res.json(recipes);
-    
-    }
-    catch( err ){
-        console.error("Error occured: ",err);
-        res.status(500).json({error : "Server error"});
-    }
+    res.json(recipes);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
-app.post('/recipes', async (req,res) =>{
-    try{
-        const newRecipe = req.body;
-
-        if(!newRecipe.title || !Array.isArray(newRecipe.ingredients)){
-            return res.status(400).json({error : "Missing fields: titles or ingredients!"});
-        }
-
-        newRecipe.deleted = false;
-        const result = await recipesCollection.insertOne(newRecipe);
-        res.status(201).json({message : "Recipe added successfully!", id : result.insertedId});
+// ---------------- ADD RECIPE ----------------
+app.post("/recipes/add", async (req, res) => {
+  try {
+    const newRecipe = req.body;
+    if (!newRecipe.title || !Array.isArray(newRecipe.ingredients)) {
+      return res
+        .status(400)
+        .json({ error: "Missing fields: title or ingredients!" });
     }
-    catch(err){
-        res.status(500).json({error : err.message});
-    }
-})
 
-app.put("/recipes/:id", async(req, res)=>{
-    try{
-        const id = req.params.id;
-        const updatedFields = req.body;
+    newRecipe.deleted = false;
+    const result = await recipesCollection.insertOne(newRecipe);
+    res
+      .status(201)
+      .json({ message: "Recipe added successfully!", id: result.insertedId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
-        await recipesCollection.updateOne(
-            {_id: new ObjectId(id)},
-            {$set: updatedFields}
-        )
+// ---------------- DELETE RECIPE ----------------
+app.delete("/recipes/delete/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    await recipesCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { deleted: true } }
+    );
+    res.json({ message: "Recipe deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
-        res.json({message : "Updated successfully!"});
-    }
-    catch(err){
-        res.status(500).json({error : err.message});
-    }
-})
+// Optional: Restore recipe (trashed)
+app.patch("/recipes/:id/restore", async (req, res) => {
+  try {
+    const id = req.params.id;
+    await recipesCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { deleted: false } }
+    );
+    res.json({ message: "Recipe restored successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
-app.delete("/recipes/:id", async(req, res)=>{
-    try{
-        const id = req.params.id;
-
-        await recipesCollection.updateOne(
-            {_id: new ObjectId(id)},
-            {$set: {deleted : true}}
-        );
-
-        res.json({message : "Deleted successfully!"});
-    }
-    catch(err){
-        res.status(500).json({error : err.message});
-    }
-})
-
-app.patch("/recipes/:id/restore", async(req, res) =>{
-    try{
-        const id = req.params.id
-
-        await recipesCollection.updateOne(
-            {_id : new ObjectId(id)},
-            {$set : {deleted : false}}
-        )
-
-        res.json({ message : "Recipe Restored succesfully!"});
-    }
-    catch(err){
-        res.status(500).json({error : err.message});
-    }
-})
-
-
-app.get("/recipes/trashed", async (req, res) => {
-     try{
-        const trashed = await recipesCollection.find({deleted : true}).toArray();
-        res.json(trashed);
-    }
-    catch(err){
-        res.status(500).json({error : err.message});
-    }
-})
-
+// Permanently delete
 app.delete("/recipes/:id/permanent", async (req, res) => {
   try {
     const id = req.params.id;
@@ -190,4 +141,152 @@ app.delete("/recipes/:id/permanent", async (req, res) => {
 });
 
 
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+/* ------------------------------------------------------------------
+   USER ROUTES
+------------------------------------------------------------------ */
+
+app.post("/users", async (req, res) => {
+  try {
+    const newUser = req.body;
+    const result = await usersCollection.insertOne(newUser);
+    res.status(201).json({ message: "User created", id: result.insertedId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/users", async (req, res) => {
+  try {
+    const users = await usersCollection.find({}).toArray();
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ------------------------------------------------------------------
+   RATINGS ROUTES
+------------------------------------------------------------------ */
+
+// add rating for a recipe
+app.post("/recipes/:id/rate", async (req, res) => {
+  try {
+    const recipeId = req.params.id;
+    const { user_id, rating, comment } = req.body;
+
+    await ratingsCollection.insertOne({
+      user_id: new ObjectId(user_id),
+      recipe_id: new ObjectId(recipeId),
+      rating,
+      comment,
+      created_at: new Date(),
+    });
+
+    res.json({ message: "Rating added" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// get ratings for a specific recipe
+app.get("/recipes/:id/ratings", async (req, res) => {
+  try {
+    const recipeId = new ObjectId(req.params.id);
+    const ratings = await ratingsCollection
+      .aggregate([
+        { $match: { recipe_id: recipeId } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "user_id",
+            foreignField: "_id",
+            as: "user_details",
+          },
+        },
+      ])
+      .toArray();
+    res.json(ratings);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// **NEW: Get all ratings**
+app.get("/ratings", async (req, res) => {
+  try {
+    const allRatings = await ratingsCollection
+      .aggregate([
+        {
+          $lookup: {
+            from: "users",
+            localField: "user_id",
+            foreignField: "_id",
+            as: "user_details",
+          },
+        },
+        {
+          $lookup: {
+            from: "recipes",
+            localField: "recipe_id",
+            foreignField: "_id",
+            as: "recipe_details",
+          },
+        },
+      ])
+      .toArray();
+    res.json(allRatings);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ------------------------------------------------------------------
+   FAVORITES ROUTES
+------------------------------------------------------------------ */
+
+app.post("/users/:userId/favorites", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const { recipe_id } = req.body;
+
+    await favoritesCollection.insertOne({
+      user_id: new ObjectId(userId),
+      recipe_id: new ObjectId(recipe_id),
+    });
+
+    res.json({ message: "Recipe added to favorites" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/users/:userId/favorites", async (req, res) => {
+  try {
+    const userId = new ObjectId(req.params.userId);
+    const favorites = await favoritesCollection
+      .aggregate([
+        { $match: { user_id: userId } },
+        {
+          $lookup: {
+            from: "recipes",
+            localField: "recipe_id",
+            foreignField: "_id",
+            as: "recipe_details",
+          },
+        },
+      ])
+      .toArray();
+
+    res.json(favorites);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ------------------------------------------------------------------
+   SERVER START
+------------------------------------------------------------------ */
+
+app.listen(PORT, () =>
+  console.log(`🚀 Server running on http://localhost:${PORT}`)
+);

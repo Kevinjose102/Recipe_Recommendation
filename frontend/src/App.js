@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Star } from "lucide-react";
 import "./App.css";
 
 const API_BASE_URL = "http://localhost:5000";
@@ -20,14 +21,16 @@ const allIngredients = [
 ];
 
 function App() {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [selectedIngredients, setSelectedIngredients] = useState([]);
   const [recipes, setRecipes] = useState([]);
+  const [recipeRatings, setRecipeRatings] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
-  const [showTrash, setShowTrash] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editingRecipe, setEditingRecipe] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // Add/Edit Recipe Modal
+  const [showAddModal, setShowAddModal] = useState(false);
   const [newRecipe, setNewRecipe] = useState({
     title: "",
     description: "",
@@ -35,539 +38,292 @@ function App() {
     source_url: "",
     ingredients: []
   });
-  const [ingredientsText, setIngredientsText] = useState("");
 
-  // Load recipes on initial mount
+  /** ---------------- LOGIN ---------------- **/
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/users`);
+      if (!res.ok) throw new Error("Failed to fetch users");
+      const users = await res.json();
+      const foundUser = users.find(u => u.email === loginData.email);
+      if (!foundUser) {
+        alert("User not found");
+        return;
+      }
+      if (foundUser.password !== loginData.password) {
+        alert("Incorrect password");
+        return;
+      }
+      setCurrentUser(foundUser);
+    } catch (err) {
+      console.error(err);
+      alert("Login failed. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /** ---------------- FETCH RECIPES ---------------- **/
   useEffect(() => {
-    fetchRecipes();
-  }, []);
+    if (currentUser) fetchRecipes();
+  }, [currentUser, selectedIngredients, searchTerm]);
 
+  const fetchRecipes = async () => {
+  if (!currentUser) return;
+
+  setLoading(true);
+  try {
+    let url = `${API_BASE_URL}/recipes`;
+    let data;
+
+    if (selectedIngredients.length > 0) {
+      const res = await fetch(`${API_BASE_URL}/recipes/ingredients`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ingredients: selectedIngredients })
+      });
+      if (!res.ok) throw new Error("Failed to fetch recipes by ingredients");
+      data = await res.json();
+    } else if (searchTerm.trim()) {
+      url += `?search=${encodeURIComponent(searchTerm.trim())}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Failed to fetch recipes");
+      data = await res.json();
+    } else {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Failed to fetch recipes");
+      data = await res.json();
+    }
+
+    setRecipes(data);
+    await fetchAllRatings(data);
+  } catch (err) {
+    console.error(err);
+    setRecipes([]);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+  /** ---------------- FETCH RATINGS ---------------- **/
+  const fetchAllRatings = async (recipeList) => {
+    const ratingsData = {};
+    for (const recipe of recipeList) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/recipes/${recipe._id}/ratings`);
+        if (res.ok) {
+          const ratings = await res.json();
+          const avgRating = ratings.length
+            ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length
+            : 0;
+          ratingsData[recipe._id] = { average: avgRating, count: ratings.length };
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    setRecipeRatings(ratingsData);
+  };
+
+  /** ---------------- RENDER STARS ---------------- **/
+  const renderStars = (avgRating, count) => (
+    <div className="flex items-center gap-1 mt-1">
+      {[1,2,3,4,5].map(star => (
+        <Star
+          key={star}
+          size={16}
+          fill={star <= Math.round(avgRating) ? "#fbbf24" : "none"}
+          color="#fbbf24"
+        />
+      ))}
+      <span className="text-sm text-gray-600">{avgRating > 0 ? `(${count})` : 'No ratings'}</span>
+    </div>
+  );
+
+  /** ---------------- HANDLE INGREDIENT SELECTION ---------------- **/
   const toggleIngredient = (ingredient) => {
-    setSelectedIngredients((prev) =>
+    setSelectedIngredients(prev =>
       prev.includes(ingredient)
-        ? prev.filter((ing) => ing !== ingredient)
+        ? prev.filter(i => i !== ingredient)
         : [...prev, ingredient]
     );
   };
 
-  const fetchRecipes = async () => {
-    setLoading(true);
-    try {
-      let url = `${API_BASE_URL}/recipes`;
-      let data;
-
-      if (selectedIngredients.length > 0) {
-        // POST request for ingredient-based search
-        const res = await fetch(`${API_BASE_URL}/recipes/ingredients`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ingredients: selectedIngredients }),
-        });
-        
-        if (!res.ok) throw new Error("Failed to fetch recipes by ingredients");
-        data = await res.json();
-
-        // Apply search term filter if present
-        if (searchTerm) {
-          data = data.filter((recipe) =>
-            recipe.title.toLowerCase().includes(searchTerm.toLowerCase())
-          );
-        }
-      } else {
-        // GET request for all recipes or search by name
-        if (searchTerm) {
-          url += `?search=${encodeURIComponent(searchTerm)}`;
-        }
-        const res = await fetch(url);
-        
-        if (!res.ok) throw new Error("Failed to fetch recipes");
-        data = await res.json();
-      }
-
-      setRecipes(data);
-    } catch (err) {
-      console.error("Error fetching recipes:", err);
-      alert("Failed to fetch recipes. Please try again.");
-      setRecipes([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchTrashedRecipes = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_BASE_URL}/recipes/trashed`);
-      
-      if (!res.ok) throw new Error("Failed to fetch trashed recipes");
-      const data = await res.json();
-      setRecipes(data);
-    } catch (err) {
-      console.error("Error fetching trashed recipes:", err);
-      alert("Failed to fetch trashed recipes. Please try again.");
-      setRecipes([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (showTrash) {
-      alert("Search is not available in trash view");
+  /** ---------------- ADD RECIPE ---------------- **/
+  const handleAddRecipe = async () => {
+    if (!newRecipe.title || !newRecipe.description) {
+      alert("Title and description are required");
       return;
     }
-    fetchRecipes();
-  };
-
-  const handleDelete = async (recipeId) => {
-    if (!window.confirm("Are you sure you want to move this recipe to trash?")) return;
-    
-    setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/recipes/${recipeId}`, {
-        method: "DELETE"
-      });
-      
-      if (!res.ok) throw new Error("Failed to delete recipe");
-      
-      alert("Recipe moved to trash!");
-      await fetchRecipes();
-    } catch (err) {
-      console.error("Error deleting recipe:", err);
-      alert("Failed to delete recipe. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRestore = async (recipeId) => {
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_BASE_URL}/recipes/${recipeId}/restore`, {
-        method: "PATCH"
-      });
-      
-      if (!res.ok) throw new Error("Failed to restore recipe");
-      
-      alert("Recipe restored successfully!");
-      await fetchTrashedRecipes();
-    } catch (err) {
-      console.error("Error restoring recipe:", err);
-      alert("Failed to restore recipe. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePermanentDelete = async (recipeId) => {
-    if (!window.confirm("Permanently delete this recipe? This action CANNOT be undone!")) return;
-    
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_BASE_URL}/recipes/${recipeId}/permanent`, {
-        method: "DELETE"
-      });
-      
-      if (!res.ok) throw new Error("Failed to permanently delete recipe");
-      
-      alert("Recipe permanently deleted!");
-      await fetchTrashedRecipes();
-    } catch (err) {
-      console.error("Error permanently deleting recipe:", err);
-      alert("Failed to permanently delete recipe. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddRecipe = async (e) => {
-    e.preventDefault();
-    const ingredientsArray = ingredientsText
-      .split(",")
-      .map(i => i.trim())
-      .filter(i => i.length > 0);
-
-    const recipeToSend = { ...newRecipe, ingredients: ingredientsArray };
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_BASE_URL}/recipes`, {
+      const res = await fetch(`${API_BASE_URL}/recipes/add`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(recipeToSend)
+        body: JSON.stringify(newRecipe)
       });
-      
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to add recipe");
-      }
-      
-      alert("Recipe added successfully!");
+      if (!res.ok) throw new Error("Failed to add recipe");
+      const data = await res.json();
+      alert(data.message);
       setShowAddModal(false);
-      setNewRecipe({ title: "", description: "", thumbnail: "", source_url: "", ingredients: [] });
-      
-      if (!showTrash) {
-        await fetchRecipes();
-      }
-    } catch (err) {
-      console.error("Error adding recipe:", err);
-      alert(err.message || "Failed to add recipe. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleUpdateRecipe = async (e) => {
-    e.preventDefault();
-
-    const ingredientsArray = ingredientsText
-      .split(",")
-      .map(i => i.trim())
-      .filter(i => i.length > 0);
-
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_BASE_URL}/recipes/${editingRecipe._id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: editingRecipe.title,
-          description: editingRecipe.description,
-          thumbnail: editingRecipe.thumbnail,
-          source_url: editingRecipe.source_url,
-          ingredients: ingredientsArray
-        })
+      setNewRecipe({
+        title: "",
+        description: "",
+        thumbnail: "",
+        source_url: "",
+        ingredients: []
       });
-      
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to update recipe");
-      }
-      
-      alert("Recipe updated successfully!");
-      setShowEditModal(false);
-      setEditingRecipe(null);
-      
-      if (showTrash) {
-        await fetchTrashedRecipes();
-      } else {
-        await fetchRecipes();
-      }
-    } catch (err) {
-      console.error("Error updating recipe:", err);
-      alert(err.message || "Failed to update recipe. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const openEditModal = (recipe) => {
-    setEditingRecipe({ ...recipe });
-    setIngredientsText(recipe.ingredients ? recipe.ingredients.join(", ") : "");
-    setShowEditModal(true);
-};
-
-
-  const toggleTrashView = () => {
-    setShowTrash(!showTrash);
-    if (!showTrash) {
-      fetchTrashedRecipes();
-    } else {
-      setSearchTerm("");
-      setSelectedIngredients([]);
       fetchRecipes();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add recipe");
     }
   };
 
-  const closeAddModal = () => {
-    setShowAddModal(false);
-    setNewRecipe({ title: "", description: "", thumbnail: "", source_url: "", ingredients: [] });
+  /** ---------------- DELETE RECIPE ---------------- **/
+  const handleDeleteRecipe = async (recipeId) => {
+    if (!window.confirm("Are you sure you want to delete this recipe?")) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/recipes/delete/${recipeId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete recipe");
+      const data = await res.json();
+      alert(data.message);
+      fetchRecipes();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete recipe");
+    }
   };
 
-  const closeEditModal = () => {
-    setShowEditModal(false);
-    setEditingRecipe(null);
-  };
+  /** ---------------- LOGIN PAGE ---------------- **/
+  if (!currentUser) {
+    return (
+      <div className="login-page">
+        <form onSubmit={handleLogin}>
+          <h2>Login</h2>
+          <input
+            type="email"
+            placeholder="Email"
+            value={loginData.email}
+            onChange={(e) => setLoginData({...loginData, email: e.target.value})}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={loginData.password}
+            onChange={(e) => setLoginData({...loginData, password: e.target.value})}
+            required
+          />
+          <button type="submit" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </form>
+      </div>
+    );
+  }
 
+  /** ---------------- MAIN RECIPE PAGE ---------------- **/
   return (
     <div className="container">
-      {/* Loading Overlay */}
-      {loading && (
-        <div className="loading-overlay">
-          <div className="loading-spinner"></div>
-        </div>
-      )}
-
       {/* Sidebar */}
       <div className="sidebar">
         <h2>Pantry</h2>
         <div className="ingredients">
-          {allIngredients.map((ingredient) => (
+          {allIngredients.map(ing => (
             <button
-              key={ingredient}
-              className={`ingredient-btn ${
-                selectedIngredients.includes(ingredient) ? "selected" : ""
-              }`}
-              onClick={() => toggleIngredient(ingredient)}
-              disabled={showTrash}
+              key={ing}
+              className={`ingredient-btn ${selectedIngredients.includes(ing) ? 'selected' : ''}`}
+              onClick={() => toggleIngredient(ing)}
             >
-              {ingredient}
+              {ing}
             </button>
           ))}
         </div>
-        <button 
-          className="generate-btn" 
-          onClick={fetchRecipes}
-          disabled={showTrash || loading}
-        >
+        <button onClick={fetchRecipes} disabled={loading}>
           Generate Recipes
         </button>
-        {showTrash && (
-          <p className="trash-notice">
-            Ingredient filtering is disabled in trash view
-          </p>
-        )}
+        <button onClick={() => setShowAddModal(true)}>Add Recipe</button>
       </div>
 
-      {/* Main Content */}
+      {/* Content */}
       <div className="content">
-        <div className="content-header">
-          <img
-            src={`${process.env.PUBLIC_URL}/recipe.png`}
-            alt="Recipe Recommender Logo"
-            className="logo"
+        <h2>Recipe Recommender</h2>
+        <form onSubmit={(e) => { e.preventDefault(); fetchRecipes(); }}>
+          <input
+            type="text"
+            placeholder="Search recipes..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            disabled={loading}
           />
-          <h2>Recipe Recommender</h2>
-        </div>
+          <button type="submit" disabled={loading}>Search</button>
+        </form>
 
-        {/* Action Buttons */}
-        <div className="action-buttons">
-          <button 
-            className="add-recipe-btn" 
-            onClick={() => setShowAddModal(true)}
-            disabled={loading}
-          >
-            + Add Recipe
-          </button>
-          <button 
-            className="trash-btn" 
-            onClick={toggleTrashView}
-            disabled={loading}
-          >
-            {showTrash ? "← Back to Recipes" : "🗑️ View Trash"}
-          </button>
-        </div>
+        <div className="recipe-list">
+          {recipes.map(recipe => (
+            <div key={recipe._id} className="recipe-card">
+              <img src={recipe.thumbnail} alt={recipe.title} />
+              <h3>{recipe.title}</h3>
+              <p>{recipe.description}</p>
+              <a href={recipe.source_url} target="_blank" rel="noreferrer">View Recipe</a>
 
-        {/* Search Bar */}
-        {!showTrash && (
-          <form onSubmit={handleSearch} className="search-form">
+              {/* DELETE */}
+              <button className="delete-btn" onClick={() => handleDeleteRecipe(recipe._id)}>
+                Delete
+              </button>
+              
+              {/* RATING */}
+              {recipeRatings[recipe._id] && renderStars(recipeRatings[recipe._id].average, recipeRatings[recipe._id].count)}
+
+              
+            </div>
+          ))}
+          {recipes.length === 0 && <p>{loading ? "Loading..." : "No recipes found."}</p>}
+        </div>
+      </div>
+
+      {/* ADD RECIPE MODAL */}
+      {showAddModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>Add Recipe</h3>
             <input
               type="text"
-              placeholder="Search recipes by name..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              disabled={loading}
+              placeholder="Title"
+              value={newRecipe.title}
+              onChange={e => setNewRecipe({...newRecipe, title: e.target.value})}
             />
-            <button type="submit" className="search-btn" disabled={loading}>
-              Search
-            </button>
-          </form>
-        )}
-
-        {/* Recipe List */}
-        {recipes.length > 0 ? (
-          <div className="recipe-list">
-            {recipes.map((recipe) => (
-              <div key={recipe._id} className="recipe-card">
-                <img src={recipe.thumbnail} alt={recipe.title} className="recipe-image" />
-                <div className="recipe-info">
-                  <h3>{recipe.title}</h3>
-                  <p>{recipe.description}</p>
-                  <a
-                    href={recipe.source_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="view-btn"
-                  >
-                    View Recipe
-                  </a>
-                  {recipe.matchedIngredients !== undefined && (
-                    <p className="matched">Matched Ingredients: {recipe.matchedIngredients}</p>
-                  )}
-                  
-                  {/* Action Buttons */}
-                  <div className="recipe-actions">
-                    {showTrash ? (
-                      <>
-                        <button 
-                          className="restore-btn"
-                          onClick={() => handleRestore(recipe._id)}
-                          disabled={loading}
-                        >
-                          ↻ Restore
-                        </button>
-                        <button 
-                          className="permanent-delete-btn"
-                          onClick={() => handlePermanentDelete(recipe._id)}
-                          disabled={loading}
-                        >
-                          Delete Forever
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button 
-                          className="edit-btn"
-                          onClick={() => openEditModal(recipe)}
-                          disabled={loading}
-                        >
-                          ✎ Edit
-                        </button>
-                        <button 
-                          className="delete-btn"
-                          onClick={() => handleDelete(recipe._id)}
-                          disabled={loading}
-                        >
-                          🗑️ Delete
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="empty">
-            {loading 
-              ? "Loading..." 
-              : showTrash 
-              ? "No recipes in trash." 
-              : "No recipes found. Select ingredients or search by name."}
-          </p>
-        )}
-      </div>
-
-      {/* Add Recipe Modal */}
-      {showAddModal && (
-        <div className="modal-overlay" onClick={closeAddModal}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h2>Add New Recipe</h2>
-            <form onSubmit={handleAddRecipe}>
-              <input
-                type="text"
-                placeholder="Recipe Title"
-                value={newRecipe.title}
-                onChange={(e) => setNewRecipe({...newRecipe, title: e.target.value})}
-                required
-                disabled={loading}
-              />
-              <textarea
-                placeholder="Description"
-                value={newRecipe.description}
-                onChange={(e) => setNewRecipe({...newRecipe, description: e.target.value})}
-                required
-                disabled={loading}
-              />
-              <input
-                type="url"
-                placeholder="Thumbnail URL"
-                value={newRecipe.thumbnail}
-                onChange={(e) => setNewRecipe({...newRecipe, thumbnail: e.target.value})}
-                required
-                disabled={loading}
-              />
-              <input
-                type="url"
-                placeholder="Source URL"
-                value={newRecipe.source_url}
-                onChange={(e) => setNewRecipe({...newRecipe, source_url: e.target.value})}
-                required
-                disabled={loading}
-              />
-              <div className="ingredients-input-section">
-                <label>Ingredients (comma-separated)</label>
-                <textarea
-                  placeholder="e.g., tomato, cheese, basil, olive oil"
-                  value={ingredientsText}
-                  onChange={(e) => setIngredientsText(e.target.value)}
-                  rows="3"
-                />
-                <small className="helper-text">
-                  Enter ingredients separated by commas
-                </small>
-              </div>
-              <div className="modal-actions">
-                <button type="submit" className="submit-btn" disabled={loading}>
-                  {loading ? "Adding..." : "Add Recipe"}
-                </button>
-                <button type="button" className="cancel-btn" onClick={closeAddModal} disabled={loading}>
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Recipe Modal */}
-      {showEditModal && editingRecipe && (
-        <div className="modal-overlay" onClick={closeEditModal}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h2>Edit Recipe</h2>
-            <form onSubmit={handleUpdateRecipe}>
-              <input
-                type="text"
-                placeholder="Recipe Title"
-                value={editingRecipe.title}
-                onChange={(e) => setEditingRecipe({...editingRecipe, title: e.target.value})}
-                required
-                disabled={loading}
-              />
-              <textarea
-                placeholder="Description"
-                value={editingRecipe.description}
-                onChange={(e) => setEditingRecipe({...editingRecipe, description: e.target.value})}
-                required
-                disabled={loading}
-              />
-              <input
-                type="url"
-                placeholder="Thumbnail URL"
-                value={editingRecipe.thumbnail}
-                onChange={(e) => setEditingRecipe({...editingRecipe, thumbnail: e.target.value})}
-                required
-                disabled={loading}
-              />
-              <input
-                type="url"
-                placeholder="Source URL"
-                value={editingRecipe.source_url}
-                onChange={(e) => setEditingRecipe({...editingRecipe, source_url: e.target.value})}
-                required
-                disabled={loading}
-              />
-              <div className="ingredients-input-section">
-                <label>Ingredients (comma-separated)</label>
-                <textarea
-                  placeholder="e.g., tomato, cheese, basil, olive oil"
-                  value={ingredientsText}
-                  onChange={(e) => setIngredientsText(e.target.value)}
-                  rows="3"
-                />
-                <small className="helper-text">
-                  Enter ingredients separated by commas
-                </small>
-              </div>
-              <div className="modal-actions">
-                <button type="submit" className="submit-btn" disabled={loading}>
-                  {loading ? "Updating..." : "Update Recipe"}
-                </button>
-                <button type="button" className="cancel-btn" onClick={closeEditModal} disabled={loading}>
-                  Cancel
-                </button>
-              </div>
-            </form>
+            <input
+              type="text"
+              placeholder="Description"
+              value={newRecipe.description}
+              onChange={e => setNewRecipe({...newRecipe, description: e.target.value})}
+            />
+            <input
+              type="text"
+              placeholder="Thumbnail URL"
+              value={newRecipe.thumbnail}
+              onChange={e => setNewRecipe({...newRecipe, thumbnail: e.target.value})}
+            />
+            <input
+              type="text"
+              placeholder="Source URL"
+              value={newRecipe.source_url}
+              onChange={e => setNewRecipe({...newRecipe, source_url: e.target.value})}
+            />
+            <input
+              type="text"
+              placeholder="Ingredients (comma separated)"
+              value={newRecipe.ingredients.join(", ")}
+              onChange={e => setNewRecipe({...newRecipe, ingredients: e.target.value.split(",").map(i => i.trim())})}
+            />
+            <div className="modal-buttons">
+              <button onClick={handleAddRecipe}>Add</button>
+              <button onClick={() => setShowAddModal(false)}>Cancel</button>
+            </div>
           </div>
         </div>
       )}
